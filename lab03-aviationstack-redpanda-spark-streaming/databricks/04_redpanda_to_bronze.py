@@ -12,7 +12,7 @@
 from pyspark.sql import functions as F
 
 
-BRONZE_TABLE = f"{CATALOG}.{BRONZE_SCHEMA}.aviationstack_flights"
+BRONZE_TABLE = f"{BRONZE_CATALOG}.{BRONZE_SCHEMA}.flights"
 
 
 def escape_jaas(value):
@@ -81,7 +81,7 @@ bronze_stream = kafka_stream.select(
 
 query = (
     bronze_stream.writeStream
-    .queryName("redpanda_to_bronze_aviationstack_flights")
+    .queryName("redpanda_to_bronze_flights")
     .outputMode("append")
     .option("checkpointLocation", BRONZE_CHECKPOINT_LOCATION)
     .trigger(availableNow=True)
@@ -92,4 +92,3 @@ query.awaitTermination()
 
 print(f"Bronze ingestion completed: {BRONZE_TABLE}")
 print(f"Checkpoint: {BRONZE_CHECKPOINT_LOCATION}")
-

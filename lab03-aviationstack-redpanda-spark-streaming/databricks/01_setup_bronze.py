@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Paso 2 — DDL inicial de Bronze en S3
-# MAGIC Crea los schemas Medallion y registra la tabla Delta externa.
+# MAGIC Crea el catálogo y schema de Bronze, y registra la tabla Delta externa.
 
 # COMMAND ----------
 
@@ -9,20 +9,16 @@
 
 # COMMAND ----------
 
-# En Free Edition escribimos únicamente en el catálogo workspace.
-if CATALOG != "workspace":
-    raise ValueError("For this Free Edition lab, catalog must be workspace")
-
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{BRONZE_SCHEMA}")
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SILVER_SCHEMA}")
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{GOLD_SCHEMA}")
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{OPERATIONS_SCHEMA}")
+spark.sql(f"CREATE CATALOG IF NOT EXISTS {BRONZE_CATALOG}")
+spark.sql(
+    f"CREATE SCHEMA IF NOT EXISTS {BRONZE_CATALOG}.{BRONZE_SCHEMA}"
+)
 
 # COMMAND ----------
 
 spark.sql(
     f"""
-    CREATE TABLE IF NOT EXISTS {CATALOG}.{BRONZE_SCHEMA}.aviationstack_flights (
+    CREATE TABLE IF NOT EXISTS {BRONZE_CATALOG}.{BRONZE_SCHEMA}.flights (
         record_id STRING NOT NULL COMMENT 'Hash of topic, partition and offset',
         message_key STRING COMMENT 'Kafka message key',
         raw_payload STRING COMMENT 'Original JSON received from Redpanda',
@@ -48,6 +44,6 @@ spark.sql(
 # COMMAND ----------
 
 print("DDL completed")
-print(f"Table: {CATALOG}.{BRONZE_SCHEMA}.aviationstack_flights")
+print(f"Table: {BRONZE_CATALOG}.{BRONZE_SCHEMA}.flights")
 print(f"Table location: {BRONZE_AVIATIONSTACK_FLIGHTS_LOCATION}")
 print(f"Checkpoint: {BRONZE_CHECKPOINT_LOCATION}")

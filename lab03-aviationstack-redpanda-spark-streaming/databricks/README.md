@@ -1,92 +1,58 @@
 # Databricks — Lab 03
 
-Este paso configura nombres y credenciales de forma separada. No crea tablas,
-catálogos ni conexiones de streaming.
+Pipeline de datos para procesar observaciones de Aviationstack publicadas en
+Redpanda mediante una arquitectura Medallion en Databricks.
 
-## 1. Importar el notebook
+## 1. Namespace de Unity Catalog
 
-Importa `00_config.py` en tu workspace de Databricks y ejecútalo con compute
-serverless.
-
-Las capturas de Free Edition confirman que `workspace` es el catálogo
-predeterminado y escribible. `samples` contiene ejemplos y `system` contiene
-objetos internos de observabilidad; no escribiremos en ellos.
-
-Las capas serán schemas:
+El laboratorio combina la capa Medallion y el entorno en el catálogo. El
+schema representa la fuente en Bronze, el dominio en Silver y el producto de
+datos en Gold:
 
 ```text
-workspace.bronze
-workspace.silver
-workspace.gold
-workspace.operations
+catalog.schema.table
+
+bronze_dev.aviationstack.flights
+silver_dev.aviation.flight_status_history
+silver_dev.aviation.current_flight_status
+gold_dev.peru_flight_tracking.current_status
+gold_dev.peru_flight_tracking.airport_movements
 ```
 
-La primera tabla será externa y sus datos vivirán en S3:
+Esta estructura evita repetir la fuente o el producto en el nombre de la
+tabla. Redpanda tampoco forma parte del nombre lógico porque es el canal
+técnico de ingestión.
+
+El widget `environment` de `00_config.py` acepta:
 
 ```text
-workspace.bronze.aviationstack_flights
-s3://atokongo-labs/lab03-spark-streaming-redpanda-and-spark/
-  bronze/aviationstack/flights
+dev
+stg
+prd
 ```
 
-El checkpoint de la primera consulta será:
+Por ejemplo, al seleccionar `prd`, los catálogos serán `bronze_prd`,
+`silver_prd` y `gold_prd` sin cambiar el resto de los notebooks.
 
-```text
-s3://atokongo-labs/lab03-spark-streaming-redpanda-and-spark/
-  operations/checkpoints/redpanda-to-bronze-aviationstack-flights
-```
+## 2. Almacenamiento externo en S3
 
-No se crea ningún Volume. Antes de ejecutar `01_setup_bronze.py`, la ruta
+Todas las tablas son Delta externas. Antes de ejecutar los DDL, la ruta
 `s3://atokongo-labs/` debe estar registrada y validada como External Location
 en Unity Catalog.
 
-## 2. Taxonomía de almacenamiento
-
-Cada capa responde a una pregunta diferente:
+No se crea ningún Volume. Para desarrollo se usa esta taxonomía física:
 
 ```text
-bronze/<fuente>/<objeto-de-origen>
-silver/<dominio>/<entidad>/<dataset>
-gold/<dominio>/<producto-de-datos>/<dataset>
-operations/checkpoints/<pipeline>
-```
-
-Los nombres de tablas siguen una taxonomía complementaria:
-
-```text
-bronze.<fuente>_<objeto>
-silver.<entidad>_<propósito>
-gold.<producto_de_datos>_<dataset>
-```
-
-Para este laboratorio se usarán:
-
-```text
-workspace.bronze.aviationstack_flights
-workspace.silver.flight_status_history
-workspace.silver.current_flight_status
-workspace.gold.peru_flight_tracking_current_status
-workspace.gold.peru_flight_tracking_airport_movements
-```
-
-Silver no incluye `aviationstack` en el nombre porque representa el modelo
-conformado del dominio y podrá integrar otras fuentes sin renombrar sus tablas.
-Redpanda tampoco forma parte del nombre lógico: es el canal técnico de
-ingestión y queda registrado en metadatos y columnas técnicas.
-
-Aplicada al laboratorio:
-
-```text
-lab03-spark-streaming-redpanda-and-spark/
+s3://atokongo-labs/lab03-spark-streaming-redpanda-and-spark/dev/
 ├── bronze/
 │   └── aviationstack/flights/
 ├── silver/
-│   └── flight-operations/flights/
+│   └── aviation/flights/
 │       ├── flight-status-history/
-│       └── flight-status-current/
+│       └── current-flight-status/
 ├── gold/
-│   └── flight-operations/peru-flight-tracking/
-│       ├── current-flight-status/
+│   └── aviation/peru-flight-tracking/
+│       ├── current-status/
 │       └── airport-movements/
 └── operations/
     └── checkpoints/
@@ -94,56 +60,27 @@ lab03-spark-streaming-redpanda-and-spark/
         └── bronze-to-silver-flights/
 ```
 
-Importa los notebooks en la misma carpeta y ejecuta los DDL en orden:
-
-```text
-00_config.py
-01_setup_bronze.py
-02_setup_silver.py
-03_setup_gold.py
-```
-
-Las tablas se crean vacías. Los notebooks de transformación posteriores serán
-los responsables de poblar Silver desde Bronze y Gold desde Silver.
+Los checkpoints son estado técnico de Structured Streaming y no se registran
+como tablas, schemas ni catálogos.
 
 ## 3. Responsabilidad de las tablas
 
 | Tabla | Responsabilidad |
 |---|---|
-| `bronze.aviationstack_flights` | Conservar cada mensaje original y sus metadatos Kafka. |
-| `silver.flight_status_history` | Mantener cada observación válida del vuelo a través del tiempo. |
-| `silver.current_flight_status` | Conservar únicamente el último estado conocido por vuelo programado. |
-| `gold.peru_flight_tracking_current_status` | Entregar a Power BI el seguimiento actual de vuelos peruanos. |
-| `gold.peru_flight_tracking_airport_movements` | Entregar indicadores horarios de llegadas, salidas, retrasos y cancelaciones. |
+| `bronze_dev.aviationstack.flights` | Conservar cada mensaje original junto con sus metadatos Kafka. |
+| `silver_dev.aviation.flight_status_history` | Mantener cada observación válida del vuelo a través del tiempo. |
+| `silver_dev.aviation.current_flight_status` | Conservar solamente el último estado conocido de cada vuelo programado. |
+| `gold_dev.peru_flight_tracking.current_status` | Entregar a Power BI el seguimiento actual de los vuelos peruanos. |
+| `gold_dev.peru_flight_tracking.airport_movements` | Entregar indicadores horarios de llegadas, salidas, retrasos y cancelaciones. |
 
-La tabla `current_flight_status` será actualizada con `MERGE` usando
-`flight_instance_id`; así Power BI obtiene el último estado sin perder el
-histórico almacenado en `flight_status_history`.
+`current_flight_status` se actualiza con `MERGE` usando
+`flight_instance_id`. De esa manera Power BI consulta el último estado sin
+perder el histórico almacenado en `flight_status_history`.
 
-## 4. Procesos de poblamiento
+## 4. Orden de ejecución
 
-Los procesos se ejecutan en este orden:
-
-```text
-Producer Python
-    ↓
-Redpanda: viation-peru
-    ↓ 04_redpanda_to_bronze.py
-workspace.bronze.aviationstack_flights
-    ↓ 05_bronze_to_silver.py
-workspace.silver.flight_status_history
-workspace.silver.current_flight_status
-    ↓ 06_silver_to_gold.py
-workspace.gold.peru_flight_tracking_current_status
-workspace.gold.peru_flight_tracking_airport_movements
-```
-
-`04_redpanda_to_bronze.py` y `05_bronze_to_silver.py` utilizan Structured
-Streaming con `AvailableNow`: procesan todo lo pendiente, conservan el avance
-en sus checkpoints de S3 y terminan. `06_silver_to_gold.py` es un proceso
-incremental batch que usa `MERGE` para actualizar el producto de datos.
-
-Para una ejecución completa importa y ejecuta:
+Los notebooks deben permanecer juntos porque utilizan `%run ./00_config`.
+Ejecuta por primera vez:
 
 ```text
 00_config.py
@@ -155,73 +92,91 @@ Para una ejecución completa importa y ejecuta:
 06_silver_to_gold.py
 ```
 
-En ejecuciones posteriores no necesitas repetir los DDL `01`, `02` y `03`.
-Ejecuta nuevamente `04`, `05` y `06` después de que el producer publique datos.
-
-Comprueba el resultado con:
-
-```sql
-SELECT COUNT(*) FROM workspace.bronze.aviationstack_flights;
-SELECT COUNT(*) FROM workspace.silver.flight_status_history;
-SELECT COUNT(*) FROM workspace.silver.current_flight_status;
-SELECT * FROM workspace.gold.peru_flight_tracking_current_status;
-SELECT * FROM workspace.gold.peru_flight_tracking_airport_movements;
-```
-
-## 5. Configurar Redpanda
-
-En el widget `redpanda_bootstrap_servers`, coloca el hostname y puerto del
-cluster Redpanda. Este dato no es una contraseña.
-
-El tópico ya está configurado como:
+El flujo resultante es:
 
 ```text
-viation-peru
+Producer Python
+    ↓
+Redpanda: viation-peru
+    ↓ 04_redpanda_to_bronze.py
+bronze_dev.aviationstack.flights
+    ↓ 05_bronze_to_silver.py
+silver_dev.aviation.flight_status_history
+silver_dev.aviation.current_flight_status
+    ↓ 06_silver_to_gold.py
+gold_dev.peru_flight_tracking.current_status
+gold_dev.peru_flight_tracking.airport_movements
 ```
 
-Para Databricks utiliza un usuario Redpanda de lectura diferente al usuario del
-producer cuando sea posible.
+`04_redpanda_to_bronze.py` y `05_bronze_to_silver.py` usan Structured
+Streaming con `AvailableNow`: procesan los mensajes pendientes, guardan el
+avance en S3 y terminan. `06_silver_to_gold.py` usa `MERGE` para actualizar el
+producto de datos.
 
-## 6. Crear el Secret Scope
+En ejecuciones posteriores no es necesario repetir los DDL `01`, `02` y `03`.
+Después de que el producer publique datos, ejecuta nuevamente `04`, `05` y
+`06`.
 
-Crea un scope llamado:
+## 5. Configuración de `00_config.py`
+
+Configura estos widgets antes de ejecutar los procesos:
+
+| Widget | Desarrollo |
+|---|---|
+| `environment` | `dev` |
+| `s3_bucket` | `atokongo-labs` |
+| `s3_lab_prefix` | `lab03-spark-streaming-redpanda-and-spark` |
+| `redpanda_bootstrap_servers` | Host y puerto del cluster Redpanda |
+| `redpanda_topic` | `viation-peru` |
+| `redpanda_secret_scope` | `redpanda-viation-peru` |
+
+El hostname de Redpanda no es una contraseña. Para Databricks utiliza un
+usuario de lectura distinto al usuario del producer cuando sea posible.
+
+## 6. Credenciales de Redpanda
+
+Crea el Secret Scope:
 
 ```text
 redpanda-viation-peru
 ```
 
-Dentro del scope crea dos claves:
+Y agrega las claves:
 
 ```text
 username
 password
 ```
 
-No copies esos valores dentro del notebook. Más adelante Spark los leerá con:
-
-```python
-username = dbutils.secrets.get("redpanda-viation-peru", "username")
-password = dbutils.secrets.get("redpanda-viation-peru", "password")
-```
-
-Para abrir la pantalla de creación del scope utiliza:
+No copies los valores dentro de los notebooks. Para abrir la pantalla de
+creación del scope utiliza:
 
 ```text
 https://<tu-workspace-databricks>#secrets/createScope
 ```
 
-## Resultado esperado de `00_config.py`
+## 7. Validación
 
-Al ejecutar `00_config.py` solo deben aparecer nombres no secretos:
+Al ejecutar `00_config.py` deben aparecer nombres no secretos como:
 
 ```text
-Topic: viation-peru
-Bronze: workspace.bronze
-Silver: workspace.silver
-Gold: workspace.gold
-Operations: workspace.operations
-Secret scope: redpanda-viation-peru
-S3 lab root: s3://atokongo-labs/lab03-spark-streaming-redpanda-and-spark
-Bronze data: s3://atokongo-labs/lab03-spark-streaming-redpanda-and-spark/bronze/aviationstack/flights
-Bronze checkpoint: s3://atokongo-labs/lab03-spark-streaming-redpanda-and-spark/operations/checkpoints/redpanda-to-bronze-aviationstack-flights
+Environment: dev
+Bronze: bronze_dev.aviationstack
+Silver: silver_dev.aviation
+Gold: gold_dev.peru_flight_tracking
+S3 environment root: s3://atokongo-labs/lab03-spark-streaming-redpanda-and-spark/dev
 ```
+
+Después de ejecutar el pipeline comprueba:
+
+```sql
+SELECT COUNT(*) FROM bronze_dev.aviationstack.flights;
+SELECT COUNT(*) FROM silver_dev.aviation.flight_status_history;
+SELECT COUNT(*) FROM silver_dev.aviation.current_flight_status;
+SELECT * FROM gold_dev.peru_flight_tracking.current_status;
+SELECT * FROM gold_dev.peru_flight_tracking.airport_movements;
+```
+
+Los objetos anteriores de `lakehouse.brz`, `lakehouse.slv` o `lakehouse.gld`
+no se eliminan automáticamente. Primero valida los catálogos nuevos y elimina
+los anteriores solamente cuando confirmes que ya no contienen datos útiles.

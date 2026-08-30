@@ -15,9 +15,13 @@ from pyspark.sql import types as T
 from pyspark.sql.window import Window
 
 
-BRONZE_TABLE = f"{CATALOG}.{BRONZE_SCHEMA}.aviationstack_flights"
-SILVER_HISTORY_TABLE = f"{CATALOG}.{SILVER_SCHEMA}.flight_status_history"
-SILVER_CURRENT_TABLE = f"{CATALOG}.{SILVER_SCHEMA}.current_flight_status"
+BRONZE_TABLE = f"{BRONZE_CATALOG}.{BRONZE_SCHEMA}.flights"
+SILVER_HISTORY_TABLE = (
+    f"{SILVER_CATALOG}.{SILVER_SCHEMA}.flight_status_history"
+)
+SILVER_CURRENT_TABLE = (
+    f"{SILVER_CATALOG}.{SILVER_SCHEMA}.current_flight_status"
+)
 
 # Explicit schemas prevent silent type inference changes between micro-batches.
 airport_scope_schema = T.StructType([

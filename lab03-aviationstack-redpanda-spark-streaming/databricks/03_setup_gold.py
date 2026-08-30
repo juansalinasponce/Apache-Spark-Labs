@@ -9,14 +9,16 @@
 
 # COMMAND ----------
 
-if CATALOG != "workspace":
-    raise ValueError("For this Free Edition lab, catalog must be workspace")
+spark.sql(f"CREATE CATALOG IF NOT EXISTS {GOLD_CATALOG}")
+spark.sql(
+    f"CREATE SCHEMA IF NOT EXISTS {GOLD_CATALOG}.{GOLD_SCHEMA}"
+)
 
 # COMMAND ----------
 
 spark.sql(
     f"""
-    CREATE TABLE IF NOT EXISTS {CATALOG}.{GOLD_SCHEMA}.peru_flight_tracking_current_status (
+    CREATE TABLE IF NOT EXISTS {GOLD_CATALOG}.{GOLD_SCHEMA}.current_status (
         flight_instance_id STRING NOT NULL,
         flight_date DATE,
         monitored_airport_iata STRING NOT NULL,
@@ -51,7 +53,7 @@ spark.sql(
     COMMENT 'Current Peru flight tracking dataset for reports and applications'
     TBLPROPERTIES (
         'quality' = 'gold',
-        'domain' = 'flight-operations',
+        'domain' = 'aviation',
         'data_product' = 'peru-flight-tracking'
     )
     """
@@ -61,7 +63,7 @@ spark.sql(
 
 spark.sql(
     f"""
-    CREATE TABLE IF NOT EXISTS {CATALOG}.{GOLD_SCHEMA}.peru_flight_tracking_airport_movements (
+    CREATE TABLE IF NOT EXISTS {GOLD_CATALOG}.{GOLD_SCHEMA}.airport_movements (
         metric_date_lima DATE NOT NULL,
         window_start_lima TIMESTAMP_NTZ NOT NULL,
         monitored_airport_iata STRING NOT NULL,
@@ -80,7 +82,7 @@ spark.sql(
     COMMENT 'Hourly airport movement indicators for the Peru flight tracking data product'
     TBLPROPERTIES (
         'quality' = 'gold',
-        'domain' = 'flight-operations',
+        'domain' = 'aviation',
         'data_product' = 'peru-flight-tracking',
         'dataset_type' = 'aggregate'
     )
@@ -92,11 +94,11 @@ spark.sql(
 print("Gold DDL completed")
 print(
     "Current status: "
-    f"{CATALOG}.{GOLD_SCHEMA}.peru_flight_tracking_current_status"
+    f"{GOLD_CATALOG}.{GOLD_SCHEMA}.current_status"
 )
 print(
     "Airport movements: "
-    f"{CATALOG}.{GOLD_SCHEMA}.peru_flight_tracking_airport_movements"
+    f"{GOLD_CATALOG}.{GOLD_SCHEMA}.airport_movements"
 )
 print(f"Current location: {GOLD_CURRENT_FLIGHT_STATUS_LOCATION}")
 print(f"Movements location: {GOLD_AIRPORT_MOVEMENTS_LOCATION}")

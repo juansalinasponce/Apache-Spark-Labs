@@ -13,13 +13,11 @@ from delta.tables import DeltaTable
 from pyspark.sql import functions as F
 
 
-SILVER_CURRENT_TABLE = f"{CATALOG}.{SILVER_SCHEMA}.current_flight_status"
-GOLD_CURRENT_TABLE = (
-    f"{CATALOG}.{GOLD_SCHEMA}.peru_flight_tracking_current_status"
+SILVER_CURRENT_TABLE = (
+    f"{SILVER_CATALOG}.{SILVER_SCHEMA}.current_flight_status"
 )
-GOLD_MOVEMENTS_TABLE = (
-    f"{CATALOG}.{GOLD_SCHEMA}.peru_flight_tracking_airport_movements"
-)
+GOLD_CURRENT_TABLE = f"{GOLD_CATALOG}.{GOLD_SCHEMA}.current_status"
+GOLD_MOVEMENTS_TABLE = f"{GOLD_CATALOG}.{GOLD_SCHEMA}.airport_movements"
 LIMA_TIME_ZONE = "America/Lima"
 
 
