@@ -1,0 +1,18 @@
+producto_id,categoria_id,sku,nombre_producto,marca,precio_lista,estado,fecha_actualizacion,operacion
+101,1,CUR-SQL-ANL,SQL para Analítica,DataPro,420.0,ACTIVO,2024-01-01,INSERT
+101,1,CUR-SQL-ANL,SQL para Analítica,DataPro,446.04,ACTIVO,2025-02-01,UPDATE
+102,1,CUR-PY-DE,Python para Data Engineering,CloudLab,550.0,ACTIVO,2024-01-01,INSERT
+103,1,CUR-PBI-INT,Power BI Intermedio,DataPro,480.0,ACTIVO,2024-01-01,INSERT
+103,1,CUR-PBI-INT,Power BI Intermedio,DataPro,500.42,ACTIVO,2025-02-01,UPDATE
+201,2,DIP-DA,Diplomado en Data Analytics,CloudLab,1800.0,ACTIVO,2024-01-01,INSERT
+201,2,DIP-DA,Diplomado en Data Analytics,CloudLab,1958.69,ACTIVO,2025-09-01,UPDATE
+202,2,DIP-DE,Diplomado en Ingeniería de Datos,CloudLab,2200.0,ACTIVO,2024-01-01,INSERT
+203,2,DIP-FAB,Diplomado en Microsoft Fabric,BI School,2400.0,ACTIVO,2024-01-01,INSERT
+203,2,DIP-FAB,Diplomado en Microsoft Fabric,BI School,2609.14,ACTIVO,2025-02-01,UPDATE
+301,3,ESP-LAKE,Especialización en Lakehouse,CloudLab,3200.0,ACTIVO,2024-01-01,INSERT
+301,3,ESP-LAKE,Especialización en Lakehouse,CloudLab,3415.1,ACTIVO,2025-02-01,UPDATE
+302,3,ESP-DBX,Especialización en Databricks,CloudLab,3500.0,ACTIVO,2024-01-01,INSERT
+401,4,BOOT-DE,Bootcamp Data Engineer,Analytics Academy,4200.0,ACTIVO,2024-01-01,INSERT
+401,4,BOOT-DE,Bootcamp Data Engineer,Analytics Academy,4495.66,ACTIVO,2025-06-01,UPDATE
+402,4,BOOT-AE,Bootcamp Analytics Engineer,Analytics Academy,3900.0,ACTIVO,2024-01-01,INSERT
+402,4,BOOT-AE,Bootcamp Analytics Engineer,Analytics Academy,4307.82,ACTIVO,2025-09-01,UPDATE

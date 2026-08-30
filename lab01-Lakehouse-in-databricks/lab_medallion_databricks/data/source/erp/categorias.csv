@@ -1,0 +1,5 @@
+categoria_id,nombre_categoria,estado,fecha_creacion,fecha_actualizacion
+1,Cursos,ACTIVO,2023-12-15,2023-12-15
+2,Diplomados,ACTIVO,2023-12-15,2023-12-15
+3,Especializaciones,ACTIVO,2023-12-15,2023-12-15
+4,Bootcamps,ACTIVO,2023-12-15,2023-12-15

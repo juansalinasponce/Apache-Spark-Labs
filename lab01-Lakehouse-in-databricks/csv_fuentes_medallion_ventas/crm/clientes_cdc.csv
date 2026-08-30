@@ -1,0 +1,105 @@
+cliente_id,nombres,apellidos,email,telefono,ciudad,departamento,pais,segmento,fecha_actualizacion,operacion
+1,Sofía,Ramírez,sofia.ramirez1@demo.com,918883684,Piura,Piura,Perú,Estudiante,2024-01-18,INSERT
+2,Pedro,Campos,pedro.campos2@demo.com,977005685,Piura,Piura,Perú,Premium,2024-02-11,INSERT
+3,José,Herrera,jose.herrera3@demo.com,943101783,Trujillo,La Libertad,Perú,Corporativo,2024-01-09,INSERT
+4,Rosa,Silva,rosa.silva4@demo.com,963606628,Cusco,Cusco,Perú,Estudiante,2024-02-07,INSERT
+4,Rosa,Silva,rosa.silva4@demo.com,963606628,Huancayo,Junín,Perú,Estudiante,2025-06-04,UPDATE
+5,Camila,Mendoza,camila.mendoza5@demo.com,916323852,Trujillo,La Libertad,Perú,Estudiante,2024-01-06,INSERT
+6,Natalia,García,natalia.garcia6@demo.com,966661351,Trujillo,La Libertad,Perú,Premium,2024-02-13,INSERT
+7,Gabriela,Torres,gabriela.torres7@demo.com,972820592,Huancayo,Junín,Perú,Estudiante,2024-02-08,INSERT
+8,Andrés,Flores,andres.flores8@demo.com,982070937,Lima,Lima,Perú,Retail,2024-02-13,INSERT
+9,Hugo,Flores,hugo.flores9@demo.com,968353204,Piura,Piura,Perú,Retail,2024-01-19,INSERT
+9,Hugo,Flores,hugo.flores9@demo.com,968353204,Arequipa,Arequipa,Perú,Retail,2025-11-15,UPDATE
+10,Lucía,Herrera,lucia.herrera10@demo.com,933978249,Lima,Lima,Perú,Corporativo,2024-02-02,INSERT
+10,Lucía,Herrera,lucia.herrera10@demo.com,933978249,Lima,Lima,Perú,Retail,2025-06-02,UPDATE
+11,Andrés,García,andres.garcia11@demo.com,960185867,Cusco,Cusco,Perú,Premium,2024-01-10,INSERT
+11,Andrés,García,andres.garcia11@nuevo-demo.com,960185867,Cusco,Cusco,Perú,Estudiante,2025-11-26,UPDATE
+12,Hugo,Paredes,hugo.paredes12@demo.com,912614124,Lima,Lima,Perú,Corporativo,2024-02-01,INSERT
+13,María,Reyes,maria.reyes13@demo.com,942329237,Cusco,Cusco,Perú,Premium,2024-01-04,INSERT
+14,Iván,Campos,ivan.campos14@demo.com,919289546,Arequipa,Arequipa,Perú,Retail,2024-02-01,INSERT
+15,Hugo,Silva,hugo.silva15@demo.com,973791320,Trujillo,La Libertad,Perú,Premium,2024-02-12,INSERT
+16,Diana,Paredes,diana.paredes16@demo.com,982383095,Cusco,Cusco,Perú,Estudiante,2024-01-14,INSERT
+17,Hugo,Vargas,hugo.vargas17@demo.com,997225156,Cusco,Cusco,Perú,Estudiante,2024-02-12,INSERT
+18,Camila,Herrera,camila.herrera18@demo.com,940158366,Ica,Ica,Perú,Retail,2024-01-16,INSERT
+18,Camila,Herrera,camila.herrera18@nuevo-demo.com,940158366,Ica,Ica,Perú,Corporativo,2025-05-14,UPDATE
+19,Carlos,Castillo,carlos.castillo19@demo.com,939557077,Lima,Lima,Perú,Premium,2024-02-07,INSERT
+20,Ana,Torres,ana.torres20@demo.com,914216175,Lima,Lima,Perú,Premium,2024-01-05,INSERT
+20,Ana,Torres,ana.torres20@demo.com,914216175,Lima,Lima,Perú,Retail,2025-06-22,UPDATE
+21,Natalia,Castillo,natalia.castillo21@demo.com,999788677,Arequipa,Arequipa,Perú,Premium,2024-01-18,INSERT
+22,Patricia,Vargas,patricia.vargas22@demo.com,973481353,Trujillo,La Libertad,Perú,Estudiante,2024-01-16,INSERT
+22,Patricia,Vargas,patricia.vargas22@demo.com,973481353,Arequipa,Arequipa,Perú,Estudiante,2025-02-28,UPDATE
+23,Karla,Morales,karla.morales23@demo.com,998447167,Chiclayo,Lambayeque,Perú,Retail,2024-01-07,INSERT
+24,Elena,Reyes,elena.reyes24@demo.com,917270733,Huancayo,Junín,Perú,Estudiante,2024-01-30,INSERT
+25,Daniela,García,daniela.garcia25@demo.com,924665841,Lima,Lima,Perú,Estudiante,2024-01-22,INSERT
+26,Sofía,Vargas,sofia.vargas26@demo.com,966623995,Chiclayo,Lambayeque,Perú,Estudiante,2024-01-09,INSERT
+27,Lucía,Flores,lucia.flores27@demo.com,969476001,Ica,Ica,Perú,Premium,2024-01-05,INSERT
+27,Lucía,Flores,lucia.flores27@demo.com,969476001,Ica,Ica,Perú,Retail,2025-02-28,UPDATE
+28,Karla,Silva,karla.silva28@demo.com,982556484,Arequipa,Arequipa,Perú,Retail,2024-02-11,INSERT
+28,Karla,Silva,karla.silva28@nuevo-demo.com,982556484,Huancayo,Junín,Perú,Retail,2025-01-16,UPDATE
+29,Marco,Salazar,marco.salazar29@demo.com,964547971,Arequipa,Arequipa,Perú,Premium,2024-01-11,INSERT
+30,Patricia,Medina,patricia.medina30@demo.com,932097220,Chiclayo,Lambayeque,Perú,Estudiante,2024-01-04,INSERT
+30,Patricia,Medina,patricia.medina30@demo.com,932097220,Cusco,Cusco,Perú,Estudiante,2025-08-04,UPDATE
+31,José,Salazar,jose.salazar31@demo.com,948285503,Huancayo,Junín,Perú,Corporativo,2024-01-30,INSERT
+31,José,Salazar,jose.salazar31@demo.com,948285503,Huancayo,Junín,Perú,Estudiante,2025-11-05,UPDATE
+32,Elena,Silva,elena.silva32@demo.com,949823450,Ica,Ica,Perú,Premium,2024-01-13,INSERT
+33,Pedro,Ramírez,pedro.ramirez33@demo.com,916729990,Lima,Lima,Perú,Corporativo,2024-01-04,INSERT
+34,Fernando,Medina,fernando.medina34@demo.com,920752378,Trujillo,La Libertad,Perú,Retail,2024-02-02,INSERT
+35,Natalia,Paredes,natalia.paredes35@demo.com,941568532,Arequipa,Arequipa,Perú,Retail,2024-02-13,INSERT
+35,Natalia,Paredes,natalia.paredes35@demo.com,941568532,Cusco,Cusco,Perú,Retail,2025-08-12,UPDATE
+36,José,García,jose.garcia36@demo.com,921003626,Chiclayo,Lambayeque,Perú,Retail,2024-02-09,INSERT
+36,José,García,jose.garcia36@demo.com,921003626,Chiclayo,Lambayeque,Perú,Corporativo,2025-10-27,UPDATE
+37,Elena,Campos,elena.campos37@demo.com,999889098,Piura,Piura,Perú,Corporativo,2024-01-14,INSERT
+37,Elena,Campos,elena.campos37@demo.com,999889098,Ica,Ica,Perú,Corporativo,2025-08-03,UPDATE
+38,Alonso,Castillo,alonso.castillo38@demo.com,927566185,Chiclayo,Lambayeque,Perú,Corporativo,2024-01-26,INSERT
+39,Daniela,Quispe,daniela.quispe39@demo.com,911250299,Ica,Ica,Perú,Corporativo,2024-01-05,INSERT
+40,Raúl,Ortega,raul.ortega40@demo.com,938609087,Arequipa,Arequipa,Perú,Retail,2024-02-04,INSERT
+41,Andrés,Flores,andres.flores41@demo.com,942787299,Trujillo,La Libertad,Perú,Corporativo,2024-01-05,INSERT
+41,Andrés,Flores,andres.flores41@demo.com,942787299,Ica,Ica,Perú,Corporativo,2025-03-07,UPDATE
+42,Camila,Quispe,camila.quispe42@demo.com,950603163,Trujillo,La Libertad,Perú,Estudiante,2024-02-04,INSERT
+43,Gabriela,Cruz,gabriela.cruz43@demo.com,923903144,Lima,Lima,Perú,Corporativo,2024-02-12,INSERT
+43,Gabriela,Cruz,gabriela.cruz43@demo.com,923903144,Lima,Lima,Perú,Premium,2025-07-27,UPDATE
+44,Iván,Rojas,ivan.rojas44@demo.com,984252420,Cusco,Cusco,Perú,Retail,2024-01-07,INSERT
+45,Jorge,Flores,jorge.flores45@demo.com,956020613,Cusco,Cusco,Perú,Premium,2024-02-15,INSERT
+46,Pedro,Flores,pedro.flores46@demo.com,922388090,Ica,Ica,Perú,Corporativo,2024-01-04,INSERT
+47,Ricardo,Morales,ricardo.morales47@demo.com,954769200,Cusco,Cusco,Perú,Retail,2024-01-01,INSERT
+48,Hugo,Rojas,hugo.rojas48@demo.com,984045292,Cusco,Cusco,Perú,Premium,2024-01-29,INSERT
+49,Alonso,Morales,alonso.morales49@demo.com,930005727,Lima,Lima,Perú,Retail,2024-01-05,INSERT
+50,Diana,Ramírez,diana.ramirez50@demo.com,927105448,Piura,Piura,Perú,Premium,2024-01-28,INSERT
+50,Diana,Ramírez,diana.ramirez50@demo.com,927105448,Piura,Piura,Perú,Retail,2025-10-04,UPDATE
+51,Luis,Quispe,luis.quispe51@demo.com,938195995,Piura,Piura,Perú,Retail,2024-01-23,INSERT
+52,Daniela,Mendoza,daniela.mendoza52@demo.com,964543049,Arequipa,Arequipa,Perú,Corporativo,2024-02-05,INSERT
+53,Gabriela,Rojas,gabriela.rojas53@demo.com,965337219,Chiclayo,Lambayeque,Perú,Premium,2024-01-12,INSERT
+54,Ana,Paredes,ana.paredes54@demo.com,943308443,Piura,Piura,Perú,Estudiante,2024-02-12,INSERT
+55,Miguel,Paredes,miguel.paredes55@demo.com,973174945,Arequipa,Arequipa,Perú,Estudiante,2024-01-03,INSERT
+56,Sofía,Vargas,sofia.vargas56@demo.com,940547349,Ica,Ica,Perú,Corporativo,2024-01-20,INSERT
+57,Sofía,Salazar,sofia.salazar57@demo.com,947393469,Chiclayo,Lambayeque,Perú,Estudiante,2024-01-22,INSERT
+57,Sofía,Salazar,sofia.salazar57@demo.com,947393469,Lima,Lima,Perú,Estudiante,2025-10-22,UPDATE
+58,Natalia,Torres,natalia.torres58@demo.com,978371272,Cusco,Cusco,Perú,Corporativo,2024-02-11,INSERT
+59,José,Silva,jose.silva59@demo.com,945059710,Piura,Piura,Perú,Retail,2024-01-08,INSERT
+60,Lucía,Campos,lucia.campos60@demo.com,990070438,Cusco,Cusco,Perú,Retail,2024-01-07,INSERT
+61,Elena,Reyes,elena.reyes61@demo.com,978642041,Piura,Piura,Perú,Estudiante,2024-02-08,INSERT
+62,María,Chávez,maria.chavez62@demo.com,968526649,Chiclayo,Lambayeque,Perú,Corporativo,2024-01-03,INSERT
+62,María,Chávez,maria.chavez62@nuevo-demo.com,968526649,Chiclayo,Lambayeque,Perú,Estudiante,2025-10-31,UPDATE
+63,Ana,Cruz,ana.cruz63@demo.com,919391725,Chiclayo,Lambayeque,Perú,Corporativo,2024-01-28,INSERT
+63,Ana,Cruz,ana.cruz63@demo.com,919391725,Chiclayo,Lambayeque,Perú,Retail,2025-05-12,UPDATE
+64,Daniela,Castillo,daniela.castillo64@demo.com,978064830,Piura,Piura,Perú,Retail,2024-01-20,INSERT
+65,Valeria,Morales,valeria.morales65@demo.com,949682169,Piura,Piura,Perú,Estudiante,2024-02-14,INSERT
+66,Diana,Rojas,diana.rojas66@demo.com,960888017,Chiclayo,Lambayeque,Perú,Estudiante,2024-02-12,INSERT
+67,Daniela,Paredes,daniela.paredes67@demo.com,910054484,Cusco,Cusco,Perú,Estudiante,2024-02-05,INSERT
+68,Valeria,Quispe,valeria.quispe68@demo.com,991424737,Chiclayo,Lambayeque,Perú,Estudiante,2024-02-07,INSERT
+68,Valeria,Quispe,valeria.quispe68@demo.com,991424737,Chiclayo,Lambayeque,Perú,Premium,2025-07-12,UPDATE
+69,Ricardo,Castillo,ricardo.castillo69@demo.com,938682516,Ica,Ica,Perú,Estudiante,2024-01-29,INSERT
+69,Ricardo,Castillo,ricardo.castillo69@demo.com,938682516,Ica,Ica,Perú,Premium,2025-02-05,UPDATE
+70,Andrés,Medina,andres.medina70@demo.com,979182797,Trujillo,La Libertad,Perú,Retail,2024-01-19,INSERT
+70,Andrés,Medina,andres.medina70@nuevo-demo.com,979182797,Piura,Piura,Perú,Retail,2025-07-21,UPDATE
+71,Daniela,Ortega,daniela.ortega71@demo.com,951663795,Piura,Piura,Perú,Retail,2024-01-16,INSERT
+72,Sofía,Vargas,sofia.vargas72@demo.com,942862209,Trujillo,La Libertad,Perú,Retail,2024-01-03,INSERT
+73,Patricia,Ortega,patricia.ortega73@demo.com,994525678,Arequipa,Arequipa,Perú,Estudiante,2024-01-27,INSERT
+74,Fernando,Vargas,fernando.vargas74@demo.com,942747037,Huancayo,Junín,Perú,Estudiante,2024-01-26,INSERT
+75,Jorge,Salazar,jorge.salazar75@demo.com,933607110,Arequipa,Arequipa,Perú,Estudiante,2024-01-15,INSERT
+75,Jorge,Salazar,jorge.salazar75@demo.com,933607110,Trujillo,La Libertad,Perú,Estudiante,2025-02-25,UPDATE
+76,Karla,Cruz,karla.cruz76@demo.com,943446826,Ica,Ica,Perú,Retail,2024-02-05,INSERT
+77,Paola,García,paola.garcia77@demo.com,999600766,Ica,Ica,Perú,Premium,2024-01-30,INSERT
+78,Andrés,Silva,andres.silva78@demo.com,977750178,Piura,Piura,Perú,Estudiante,2024-02-09,INSERT
+79,Elena,Silva,elena.silva79@demo.com,970407340,Ica,Ica,Perú,Premium,2024-01-31,INSERT
+80,Miguel,Mendoza,miguel.mendoza80@demo.com,942111036,Cusco,Cusco,Perú,Estudiante,2024-02-10,INSERT

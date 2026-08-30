@@ -1,0 +1,13 @@
+vendedor_id,tienda_id,nombre_vendedor,estado,fecha_ingreso
+1,4,Diana García,ACTIVO,2023-07-13
+2,1,Diana Quispe,ACTIVO,2023-11-18
+3,5,Iván Reyes,ACTIVO,2023-10-23
+4,2,Alonso Torres,ACTIVO,2023-01-24
+5,2,Hugo Quispe,ACTIVO,2023-02-10
+6,2,Natalia García,ACTIVO,2023-07-14
+7,3,Raúl Reyes,ACTIVO,2023-03-25
+8,3,Camila Vargas,ACTIVO,2023-12-10
+9,3,Alonso Torres,ACTIVO,2023-11-08
+10,2,Diana Mendoza,ACTIVO,2023-03-25
+11,4,José Flores,ACTIVO,2023-11-24
+12,5,Sofía Castillo,ACTIVO,2023-01-29

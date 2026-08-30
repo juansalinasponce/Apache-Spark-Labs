@@ -1,0 +1,6 @@
+tienda_id,nombre_tienda,canal,ciudad,region,estado,fecha_creacion
+1,Sucursal Lima Centro,Tienda,Lima,Lima,ACTIVO,2023-12-15
+2,Sucursal Arequipa,Tienda,Arequipa,Arequipa,ACTIVO,2023-12-15
+3,Sucursal Trujillo,Tienda,Trujillo,La Libertad,ACTIVO,2023-12-15
+4,Canal Web Nacional,Web,Lima,Nacional,ACTIVO,2023-12-15
+5,Partner Educación Perú,Partner,Lima,Nacional,ACTIVO,2023-12-15
