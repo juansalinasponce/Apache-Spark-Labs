@@ -1,101 +1,140 @@
-# Lab 08 — Fabric 02: landing en Lakehouse con tablas Delta
+# Lab 08 — Fabric 02: Lakehouse Bronze/Silver y Warehouse Gold
 
-Ejercicio complementario del Lab 07 para comparar dos formas de implementar la
-primera capa de una arquitectura medallion en Microsoft Fabric.
-
-En el Lab 07, Bronze se implementa dentro de un **Warehouse** con tablas
-T-SQL. En este ejercicio, las mismas entidades de negocio se crean en un
-**Lakehouse** como tablas administradas en formato **Delta Lake**.
-
-## Alcance
-
-Se trabajará únicamente con dos tablas del origen bancario MySQL:
+Laboratorio para construir una arquitectura medallion híbrida en Microsoft
+Fabric con dos entidades bancarias:
 
 - `banco_cliente`;
 - `banco_prestamo`.
 
-La capa se llamará `landing`. En este ejercicio, landing cumple la función de
-Bronze: recibe todas las columnas como `STRING`, sin aplicar conversiones de
-tipo, reglas de negocio, deduplicación ni transformaciones hacia Silver o Gold.
+Bronze y Silver se implementan como tablas Delta dentro de un Lakehouse. Silver
+mantiene el historial de cambios del cliente mediante **Slowly Changing
+Dimension Type 2 (SCD Tipo 2)**. Gold se implementa como un modelo estrella en
+un Warehouse separado.
+
+## Arquitectura
 
 ```mermaid
 flowchart LR
     A[(MySQL<br/>banco_cliente<br/>banco_prestamo)]
-    B[(Fabric Lakehouse<br/>landing.banco_cliente<br/>landing.banco_prestamo)]
+
+    subgraph LH[Lakehouse lh_banca_dev_medallion]
+        B[(brz.banco_cliente<br/>brz.banco_prestamo<br/>todo STRING)]
+        C[(slv.cliente<br/>slv.prestamo<br/>Delta tipificado)]
+    end
+
+    subgraph WH[Warehouse wh_banca_dev_gold]
+        D[(stg.cliente<br/>stg.prestamo)]
+        E[(gld.dim_cliente<br/>gld.fct_prestamo)]
+    end
+
+    F[Modelo semántico<br/>Power BI]
 
     A -->|Copy Data| B
+    B -->|Spark SQL + Delta MERGE| C
+    C -->|Copy Data| D
+    D -->|T-SQL MERGE| E
+    E --> F
 ```
 
-## Artefactos sugeridos
+## Responsabilidad de cada capa
+
+| Capa | Motor | Objetivo |
+|---|---|---|
+| Bronze | Lakehouse / Delta | Recibir el snapshot de MySQL con todas las columnas `STRING` |
+| Silver | Lakehouse / Delta | Tipificar, normalizar, deduplicar y conservar historia SCD2 |
+| Staging | Warehouse | Recibir el snapshot tipificado de Silver |
+| Gold | Warehouse | Publicar `dim_cliente` y `fct_prestamo` para análisis |
+
+## SCD Tipo 2 utilizado
+
+La clave de negocio es `id_cliente`. Silver calcula `hash_atributos` con los
+atributos descriptivos del cliente y compara el hash entrante con la versión
+actual.
+
+Cuando aparece un cliente nuevo:
+
+- inserta una fila con `es_actual = true`;
+- asigna `vigente_desde` con la fecha del proceso;
+- asigna `vigente_hasta = 9999-12-31`.
+
+Cuando cambian sus atributos:
+
+- cierra la versión anterior con `es_actual = false`;
+- actualiza `vigente_hasta`;
+- inserta una nueva versión con otro `cliente_sk`.
+
+Una nueva ejecución sin cambios no genera versiones duplicadas. El tratamiento
+de eliminaciones físicas del origen queda fuera del alcance; los cambios de
+estado sí generan una nueva versión.
+
+## Nombres sugeridos
 
 | Artefacto | Nombre |
 |---|---|
 | Workspace | `wk_banca_dev` |
-| Lakehouse | `lh_banca_dev_landing` |
-| Schema | `landing` |
-| Notebook o consulta Spark SQL | `nb_banca_dev_ddl_landing` |
+| Lakehouse | `lh_banca_dev_medallion` |
+| Warehouse | `wh_banca_dev_gold` |
+| Pipeline | `pl_banca_dev_lakehouse_warehouse` |
+| Modelo semántico | `sm_banca_dev_clientes_prestamos_lh` |
+| Reporte | `rpt_banca_dev_clientes_prestamos_lh` |
 
-El Lakehouse debe crearse con **Lakehouse schemas** habilitado para poder usar
-el namespace `landing.tabla`.
+## Tablas creadas
 
-## Archivos del ejercicio
+| Capa | Clientes | Préstamos |
+|---|---|---|
+| MySQL | `banco_cliente` | `banco_prestamo` |
+| Bronze Delta | `brz.banco_cliente` | `brz.banco_prestamo` |
+| Silver Delta | `slv.cliente` | `slv.prestamo` |
+| Warehouse staging | `stg.cliente` | `stg.prestamo` |
+| Warehouse Gold | `gld.dim_cliente` | `gld.fct_prestamo` |
+
+## Estructura
 
 ```text
 lab08-fabric-lakehouse-landing-clientes-prestamos/
 ├── README.md
 ├── ENUNCIADO.md
+├── GUIA_PASO_A_PASO.md
+├── pipeline/
+│   └── CONFIGURACION_PIPELINE.md
 └── sql/
-    └── fabric/
-        └── 01_crear_tablas_landing_delta.sql
+    ├── lakehouse/
+    │   ├── 01_crear_tablas_bronze_silver.sql
+    │   ├── 02_limpiar_bronze.sql
+    │   ├── 03_cargar_silver.sql
+    │   └── 04_validar_lakehouse.sql
+    └── warehouse/
+        ├── 01_crear_staging_gold.sql
+        ├── 02_limpiar_staging.sql
+        ├── 03_cargar_gold.sql
+        └── 04_validar_gold.sql
 ```
 
-- Entrega al estudiante: [ENUNCIADO.md](ENUNCIADO.md).
-- DDL de referencia: [01_crear_tablas_landing_delta.sql](sql/fabric/01_crear_tablas_landing_delta.sql).
+## Orden de trabajo
 
-## Cómo ejecutar el DDL
+1. Lee el [enunciado](ENUNCIADO.md).
+2. Crea el Lakehouse y el Warehouse.
+3. Ejecuta los DDL de Lakehouse y Warehouse una sola vez.
+4. Configura el pipeline con la
+   [guía de actividades](pipeline/CONFIGURACION_PIPELINE.md).
+5. Ejecuta el pipeline una primera vez.
+6. Modifica el segmento, estado, email o teléfono de un cliente en MySQL.
+7. Ejecuta el pipeline nuevamente para demostrar SCD Tipo 2.
+8. Ejecuta las validaciones y revisa las dos versiones del cliente modificado.
 
-1. En el workspace de Fabric, crea `lh_banca_dev_landing` y conserva activada
-   la opción **Lakehouse schemas**.
-2. Abre el Lakehouse y crea una consulta **Spark SQL**, o crea un notebook con
-   el Lakehouse adjunto y selecciona Spark SQL como lenguaje de la celda.
-3. Ejecuta `01_crear_tablas_landing_delta.sql`.
-4. Actualiza el explorador del Lakehouse y comprueba que ambas tablas aparezcan
-   dentro del schema `landing`.
+La [guía paso a paso](GUIA_PASO_A_PASO.md) contiene el procedimiento completo.
 
-> El DDL no debe ejecutarse en el SQL analytics endpoint. Ese endpoint permite
-> consultar las tablas Delta con T-SQL, pero la creación de estas tablas en el
-> ejercicio se realiza con Spark SQL.
+## Decisión sobre la tabla de hechos
 
-## Diferencias que debe observar el estudiante
-
-| Warehouse del Lab 07 | Lakehouse de este ejercicio |
-|---|---|
-| DDL con T-SQL | DDL con Spark SQL |
-| Tipos definidos según el negocio | Todas las columnas como `STRING` en landing |
-| Tabla administrada por Warehouse | Tabla administrada Delta en OneLake |
-| Schema `brz` | Schema `landing` |
-
-`USING DELTA` se incluye de forma explícita con fines didácticos. Delta es el
-formato de tabla predeterminado del Lakehouse de Fabric, pero escribirlo permite
-reconocer claramente la tecnología utilizada.
-
-## Resultado esperado
-
-```text
-lh_banca_dev_landing
-└── Tables
-    └── landing
-        ├── banco_cliente
-        └── banco_prestamo
-```
-
-Las tablas quedan vacías después del DDL y preparadas para una carga posterior
-con Copy Data. No se crean claves primarias, claves foráneas ni índices. Todos
-los valores se reciben como texto; la conversión a números, fechas y timestamps,
-así como la evaluación de calidad, se realizará en Silver.
+Cuando se incorpora un préstamo nuevo a Gold, se asigna el `cliente_sk` de la
+versión vigente del cliente. Si después cambia el cliente, el préstamo ya
+existente conserva su clave histórica. Los saldos y el estado del préstamo sí
+se actualizan porque `slv.prestamo` utiliza comportamiento Tipo 1.
 
 ## Referencias oficiales
 
-- [Lakehouse y tablas Delta en Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-and-delta-tables)
+- [Lakehouse y tablas Delta](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-and-delta-tables)
 - [Schemas en un Lakehouse](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-schemas)
-- [Explorador de consultas Spark SQL](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-query-explorer)
+- [Control de concurrencia y MERGE de Delta](https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-concurrency-control)
+- [Copy Activity para Lakehouse](https://learn.microsoft.com/en-us/fabric/data-factory/connector-lakehouse-copy-activity)
+- [Superficie T-SQL de Fabric Warehouse](https://learn.microsoft.com/en-us/fabric/data-warehouse/tsql-surface-area)
