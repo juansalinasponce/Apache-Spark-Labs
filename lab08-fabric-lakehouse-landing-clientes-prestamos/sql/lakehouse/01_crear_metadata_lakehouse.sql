@@ -1,11 +1,10 @@
--- Lab 08 / Fabric 02
 -- Ejecutar con Spark SQL sobre lh_banca_dev_medallion.
--- El Lakehouse debe estar adjunto y tener schemas habilitados.
+-- Este script crea únicamente la metadata y las tablas Delta vacías.
 
 CREATE SCHEMA IF NOT EXISTS brz;
 CREATE SCHEMA IF NOT EXISTS slv;
 
--- Bronze recibe una copia fiel del origen. Todas las columnas son STRING.
+-- Bronze conserva una copia fiel del origen con todas las columnas STRING.
 CREATE TABLE IF NOT EXISTS brz.banco_cliente (
     id_cliente       STRING,
     tipo_documento   STRING,
@@ -20,7 +19,6 @@ CREATE TABLE IF NOT EXISTS brz.banco_cliente (
     creado_en        STRING
 )
 USING DELTA;
-
 CREATE TABLE IF NOT EXISTS brz.banco_prestamo (
     id_prestamo         STRING,
     id_cliente          STRING,
@@ -35,7 +33,7 @@ CREATE TABLE IF NOT EXISTS brz.banco_prestamo (
 )
 USING DELTA;
 
--- Silver tipifica y conserva el historial del cliente con SCD Tipo 2.
+-- Silver contiene datos tipificados y listos para consumo analítico.
 CREATE TABLE IF NOT EXISTS slv.cliente (
     cliente_sk        STRING,
     id_cliente        INT,
@@ -57,7 +55,6 @@ CREATE TABLE IF NOT EXISTS slv.cliente (
 )
 USING DELTA;
 
--- El préstamo se mantiene con el último estado conocido (SCD Tipo 1).
 CREATE TABLE IF NOT EXISTS slv.prestamo (
     id_prestamo         INT,
     id_cliente          INT,

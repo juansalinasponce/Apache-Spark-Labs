@@ -1,5 +1,4 @@
--- Carga completa: limpiar Bronze antes de copiar el snapshot actual de MySQL.
--- Ejecutar con Spark SQL sobre lh_banca_dev_medallion.
+-- Ejecutar con Spark SQL antes de copiar el snapshot completo de MySQL.
 
 TRUNCATE TABLE brz.banco_cliente;
 TRUNCATE TABLE brz.banco_prestamo;

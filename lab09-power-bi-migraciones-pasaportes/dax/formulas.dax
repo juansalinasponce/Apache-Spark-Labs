@@ -1,0 +1,44 @@
+// Crear por separado: una tabla, dos columnas y cinco medidas.
+// Tabla calculada: Modelado > Nueva tabla.
+DimFecha =
+VAR Inicio = MIN ( Tramites[FechaSolicitud] )
+VAR Fin = MAX ( Tramites[FechaSolicitud] )
+RETURN
+    SELECTCOLUMNS (
+        CALENDAR ( Inicio, Fin ),
+        "Fecha", [Date],
+        "Anio", YEAR ( [Date] ),
+        "MesNumero", MONTH ( [Date] ),
+        "Mes", FORMAT ( [Date], "mmm", "es-PE" ),
+        "AnioMes", FORMAT ( [Date], "yyyy-MM" ),
+        "AnioMesOrden", YEAR ( [Date] ) * 100 + MONTH ( [Date] )
+    )
+
+// Columnas calculadas en Tramites: Nueva columna, una fórmula por vez.
+DiasAtencion =
+IF (
+    Tramites[Estado] = "ENTREGADO" && NOT ISBLANK ( Tramites[FechaEntrega] ),
+    DATEDIFF ( Tramites[FechaSolicitud], Tramites[FechaEntrega], DAY ),
+    BLANK ()
+)
+
+GrupoEdad =
+SWITCH (
+    TRUE (),
+    Tramites[EdadSolicitante] < 30, "18–29 años",
+    Tramites[EdadSolicitante] < 60, "30–59 años",
+    "60 años o más"
+)
+
+// Medidas: Nueva medida, una fórmula por vez.
+Total Tramites = COUNTROWS ( Tramites )
+
+Pasaportes Entregados =
+CALCULATE ( [Total Tramites], KEEPFILTERS ( Tramites[Estado] = "ENTREGADO" ) )
+
+Porcentaje Entrega = DIVIDE ( [Pasaportes Entregados], [Total Tramites], 0 )
+
+Dias Promedio = AVERAGE ( Tramites[DiasAtencion] )
+
+Tramites Pendientes =
+CALCULATE ( [Total Tramites], KEEPFILTERS ( Tramites[Estado] = "EN PROCESO" ) )

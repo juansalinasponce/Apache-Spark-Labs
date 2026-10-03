@@ -1,0 +1,59 @@
+{
+  "periodo": "2025-10-01 a 2026-09-30",
+  "corte": "2026-09-30",
+  "filas_excel": 9624,
+  "tramites": 9600,
+  "duplicados": 24,
+  "sedes": 12,
+  "entregados": 7657,
+  "porcentaje_entrega": 79.76,
+  "dias_promedio": 9.85,
+  "estados": {
+    "EN PROCESO": 1078,
+    "ENTREGADO": 7657,
+    "OBSERVADO": 588,
+    "CANCELADO": 277
+  },
+  "por_mes": {
+    "2025-10": 680,
+    "2025-11": 710,
+    "2025-12": 860,
+    "2026-01": 890,
+    "2026-02": 720,
+    "2026-03": 850,
+    "2026-04": 780,
+    "2026-05": 810,
+    "2026-06": 790,
+    "2026-07": 920,
+    "2026-08": 900,
+    "2026-09": 690
+  },
+  "entregados_por_mes_solicitud": {
+    "2025-10": 558,
+    "2025-11": 574,
+    "2025-12": 718,
+    "2026-01": 734,
+    "2026-02": 581,
+    "2026-03": 688,
+    "2026-04": 643,
+    "2026-05": 653,
+    "2026-06": 646,
+    "2026-07": 742,
+    "2026-08": 742,
+    "2026-09": 378
+  },
+  "entregados_por_sede": {
+    "Sede Lima Centro (simulada)": 1692,
+    "Sede Lima Norte (simulada)": 1203,
+    "Sede Callao (simulada)": 652,
+    "Sede Arequipa (simulada)": 634,
+    "Sede Trujillo (simulada)": 644,
+    "Sede Chiclayo (simulada)": 485,
+    "Sede Piura (simulada)": 502,
+    "Sede Cusco (simulada)": 481,
+    "Sede Huancayo (simulada)": 390,
+    "Sede Iquitos (simulada)": 324,
+    "Sede Pucallpa (simulada)": 324,
+    "Sede Tacna (simulada)": 326
+  }
+}

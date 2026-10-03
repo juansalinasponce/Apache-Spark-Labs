@@ -1,0 +1,5 @@
+lab06-mysql.env
+*.pem
+*.key
+*.crt
+

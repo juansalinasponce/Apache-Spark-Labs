@@ -1,123 +1,108 @@
-# Enunciado — Fabric 02: arquitectura híbrida con SCD Tipo 2
+# Enunciado — Fabric 02: Lakehouse y Warehouse Gold
 
 ## Situación
 
-El banco necesita analizar clientes y colocaciones de préstamos. La información
-se origina en las tablas MySQL `banco_cliente` y `banco_prestamo`.
+El banco necesita analizar sus clientes y préstamos. Los datos se encuentran en
+MySQL y deben procesarse con una arquitectura híbrida de Microsoft Fabric.
 
-El equipo de Data Engineering ha decidido usar una arquitectura híbrida de
-Microsoft Fabric:
-
-- Bronze y Silver estarán en un Lakehouse con tablas Delta;
-- Gold estará en un Warehouse orientado al consumo analítico;
-- los cambios de atributos del cliente deben conservarse mediante SCD Tipo 2.
+Bronze y Silver estarán en un Lakehouse. Gold estará en un Warehouse y deberá
+leer Silver directamente, sin duplicar los datos en tablas de staging.
 
 ## Objetivo
 
-Construir un pipeline completo que permita responder:
-
-1. ¿Cuántos clientes tienen préstamos?
-2. ¿Cuántos préstamos fueron desembolsados?
-3. ¿Cuál es el monto desembolsado, pagado y pendiente?
-4. ¿Qué segmentos concentran más colocaciones?
-5. ¿Cómo evolucionan los desembolsos por mes?
-6. ¿Qué atributos tenía un cliente antes y después de una modificación?
-
-## Arquitectura obligatoria
+Construir el flujo:
 
 ```text
-MySQL
-  │
-  ├── banco_cliente
-  └── banco_prestamo
-          │
-          ▼
-Lakehouse: lh_banca_dev_medallion
-  ├── brz.banco_cliente       (todas las columnas STRING)
-  ├── brz.banco_prestamo      (todas las columnas STRING)
-  ├── slv.cliente             (tipificada e histórica)
-  └── slv.prestamo            (tipificada, último estado)
-          │
-          ▼
-Warehouse: wh_banca_dev_gold
-  ├── stg.cliente
-  ├── stg.prestamo
-  ├── gld.dim_cliente
-  └── gld.fct_prestamo
+MySQL → Bronze Delta → Silver Delta → Warehouse Gold → Power BI
 ```
 
-## Requerimientos de Bronze
+Al finalizar se debe poder analizar:
 
-1. Usa un Lakehouse con schemas habilitados.
+1. cantidad de clientes y préstamos;
+2. montos desembolsados, pagados y pendientes;
+3. colocaciones por tipo de préstamo y segmento;
+4. evolución mensual de desembolsos;
+5. historial de cambios de los clientes.
+
+## Requerimientos de metadata
+
+1. Crea los schemas `brz` y `slv` con Spark SQL.
 2. Crea `brz.banco_cliente` y `brz.banco_prestamo` como tablas Delta.
-3. Declara todas las columnas de Bronze como `STRING`.
-4. Usa carga completa: limpia Bronze y copia el snapshot actual de MySQL.
-5. No agregues PK, FK, índices ni reglas de calidad en Bronze.
+3. Declara todas las columnas Bronze como `STRING`.
+4. Crea `slv.cliente` y `slv.prestamo` como tablas Delta tipificadas.
+5. Mantén el DDL separado del código de transformación.
 
-## Requerimientos de Silver
+## Requerimientos del ETL PySpark
 
-1. Crea `slv.cliente` y `slv.prestamo` como tablas Delta tipificadas.
-2. Usa `TRY_CAST` para convertir identificadores, fechas, montos y tasas.
-3. Normaliza texto con `TRIM`, `UPPER` o `LOWER` según corresponda.
-4. Deduplica por la clave de negocio antes de ejecutar un `MERGE`.
-5. Usa `id_cliente` como clave de negocio de la dimensión.
-6. Detecta cambios del cliente mediante un hash de atributos.
-7. Implementa SCD Tipo 2 con estas columnas de control:
-   `cliente_sk`, `vigente_desde`, `vigente_hasta`, `es_actual`,
-   `hash_atributos` y `fecha_proceso`.
-8. Una modificación debe cerrar la versión actual e insertar una nueva.
-9. Una ejecución sin cambios no debe insertar otra versión.
-10. Procesa `slv.prestamo` mediante upsert Tipo 1 por `id_prestamo`.
+Implementa Bronze → Silver en un único notebook PySpark fácil de seguir.
 
-El ejercicio no exige detectar eliminaciones físicas del origen. Para representar
-una baja, modifica el atributo `estado`; ese cambio sí debe generar una nueva
-versión SCD2.
+El notebook debe mostrar de forma explícita:
+
+1. lectura mediante `spark.table`;
+2. limpieza con `trim`, `upper` y `lower`;
+3. conversión de tipos con `cast`;
+4. deduplicación con `row_number`;
+5. cálculo de un hash para detectar cambios;
+6. cierre de la versión anterior con `DeltaTable.merge`;
+7. inserción de la nueva versión del cliente;
+8. upsert del último estado del préstamo.
+
+Evita clases, decoradores, configuraciones dinámicas y abstracciones avanzadas.
+El propósito es que un alumno pueda ejecutar cada sección y comprenderla.
+
+## Requerimientos del historial
+
+Usa `id_cliente` como clave de negocio. `slv.cliente` debe incluir:
+
+```text
+cliente_sk
+vigente_desde
+vigente_hasta
+es_actual
+hash_atributos
+fecha_proceso
+```
+
+Una modificación debe cerrar la versión anterior y crear una nueva. Una tercera
+ejecución sin cambios no debe insertar otra versión.
 
 ## Requerimientos de Gold
 
-1. Crea un Warehouse independiente llamado `wh_banca_dev_gold`.
-2. Usa `stg` como zona de transferencia desde el Lakehouse.
-3. Usa `gld` para el modelo dimensional.
-4. Crea únicamente `gld.dim_cliente` y `gld.fct_prestamo` como tablas finales.
-5. Conserva en `gld.dim_cliente` todas las versiones procedentes de Silver.
-6. Relaciona `gld.fct_prestamo.cliente_sk` con
-   `gld.dim_cliente.cliente_sk`.
-7. Calcula en Gold el monto pagado y el año y mes del desembolso.
-8. Usa `MERGE` para que la carga Gold sea repetible.
+1. Crea `gld.dim_cliente`, `gld.dim_tipo_prestamo` y `gld.fct_prestamo`.
+2. Usa `BIGINT IDENTITY` para la clave de `dim_tipo_prestamo`.
+3. Crea procedimientos separados para cargar cada dimensión y el hecho.
+4. Los procedimientos deben leer directamente:
+   - `[lh_banca_dev_medallion].[slv].[cliente]`;
+   - `[lh_banca_dev_medallion].[slv].[prestamo]`.
+5. Usa `MERGE` para que las cargas sean repetibles.
+6. Crea un procedimiento orquestador `gld.usp_cargar_gold`.
+7. Ejecuta primero las dimensiones y después la tabla de hechos.
+8. No crees tablas staging en el Warehouse.
 
-## Prueba obligatoria de SCD Tipo 2
+## Prueba de historial
 
-1. Ejecuta el pipeline con el snapshot inicial.
-2. Elige un cliente que tenga préstamo y registra su `id_cliente`.
-3. Modifica en MySQL uno de estos atributos: `segmento`, `estado`, `email` o
-   `telefono`.
-4. Ejecuta nuevamente el pipeline.
-5. Comprueba en `slv.cliente` y `gld.dim_cliente` que:
-   - existen dos versiones del cliente;
-   - la versión anterior tiene `es_actual = false`;
-   - la versión nueva tiene `es_actual = true`;
-   - las vigencias no quedan abiertas simultáneamente;
-   - cada versión tiene un `cliente_sk` diferente.
-6. Ejecuta por tercera vez sin modificar el origen y comprueba que no aparece
-   una tercera versión.
+1. Ejecuta la carga inicial.
+2. Cambia el segmento, estado, email o teléfono de un cliente en MySQL.
+3. Ejecuta nuevamente el flujo.
+4. Confirma que el cliente tenga dos versiones y dos `cliente_sk` distintos.
+5. Ejecuta el flujo una tercera vez sin cambios.
+6. Confirma que el cliente continúe teniendo únicamente dos versiones.
 
 ## Entregables
 
-- DDL Spark SQL de Bronze y Silver.
-- Transformación Silver con `MERGE` SCD Tipo 2.
-- DDL y carga T-SQL de staging y Gold.
+- DDL Spark SQL del Lakehouse.
+- Notebook PySpark de Bronze → Silver.
+- DDL T-SQL del modelo Gold.
+- Procedimientos almacenados de dimensiones y hechos.
 - Pipeline ejecutado correctamente.
-- Evidencia del cliente antes y después del cambio.
-- Resultados de las consultas de validación.
-- Diagrama del modelo semántico con relación `dim_cliente 1:* fct_prestamo`.
+- Evidencia del historial del cliente.
+- Consultas de validación.
 
 ## Criterios de finalización
 
-- Bronze contiene dos tablas Delta y todas sus columnas son `STRING`.
-- Silver contiene tipos de datos de negocio válidos.
+- Bronze conserva todas las columnas como `STRING`.
+- Silver contiene datos tipificados.
 - Cada cliente tiene exactamente una versión actual.
-- La segunda ejecución conserva la versión anterior del cliente modificado.
-- Una ejecución sin cambios es idempotente.
-- Gold conserva el mismo historial que Silver.
-- No existen préstamos Gold sin dimensión de cliente.
-- El pipeline finaliza sin errores.
+- El ETL PySpark es idempotente cuando no cambia el origen.
+- Los procedimientos leen las tablas Delta sin staging intermedio.
+- Gold no contiene préstamos sin dimensiones relacionadas.

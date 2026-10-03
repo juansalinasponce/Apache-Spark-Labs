@@ -1,8 +1,5 @@
 -- Ejecutar con Spark SQL sobre lh_banca_dev_medallion.
 
-SHOW TABLES IN brz;
-SHOW TABLES IN slv;
-
 SELECT 'brz.banco_cliente' AS tabla, COUNT(*) AS filas
 FROM brz.banco_cliente
 UNION ALL
@@ -15,7 +12,7 @@ UNION ALL
 SELECT 'slv.prestamo', COUNT(*)
 FROM slv.prestamo;
 
--- Debe devolver cero clientes con más de una versión actual.
+-- Debe devolver cero filas: cada cliente tiene una sola versión actual.
 SELECT
     id_cliente,
     SUM(CASE WHEN es_actual THEN 1 ELSE 0 END) AS versiones_actuales
@@ -23,7 +20,7 @@ FROM slv.cliente
 GROUP BY id_cliente
 HAVING SUM(CASE WHEN es_actual THEN 1 ELSE 0 END) <> 1;
 
--- Muestra el historial completo de los clientes que cambiaron.
+-- Historial de clientes que tienen más de una versión.
 SELECT
     id_cliente,
     nombre_completo,
@@ -31,7 +28,8 @@ SELECT
     estado,
     vigente_desde,
     vigente_hasta,
-    es_actual
+    es_actual,
+    cliente_sk
 FROM slv.cliente
 WHERE id_cliente IN (
     SELECT id_cliente
